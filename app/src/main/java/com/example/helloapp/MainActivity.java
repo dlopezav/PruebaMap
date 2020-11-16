@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private RoutingEngine routingEngine;
 
     private List<Policia> policias = new ArrayList<Policia>();;
-
+    private List<Policia> elegibles = new ArrayList<Policia>();;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        createPolicias(5.5016, -73.375);
 //        defaultMarker.setCoordinate(new GeoCoordinate);
 //        mapView.getMapScene().addMapMarker(defaultMarker);
     }
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     //Tunja 2 triangulos
     ////Inferior ( (5.5016, -73.375), (5.5379, -73.3696), (5.5385, -73.3397))
     ////Inferior ( (5.5865, -73.331), (5.5379, -73.3696), (5.5385, -73.3397))
-    private void routeMap(GeoCoordinates startGeoCoordinates, GeoCoordinates destinationGeoCoordinates, Policia policia) {
+    private void routeMap(GeoCoordinates destinationGeoCoordinates, int i) {
         try {
             routingEngine = new RoutingEngine();
         } catch (InstantiationErrorException e) {
@@ -78,9 +77,10 @@ public class MainActivity extends AppCompatActivity {
         }
 //        GeoCoordinates startGeoCoordinates = new GeoCoordinates(4.6262298,-74.090634);
 //        GeoCoordinates destinationGeoCoordinates = new GeoCoordinates(4.732382, -74.104702);
-        Waypoint startWaypoint = new Waypoint(startGeoCoordinates);
+        Waypoint startWaypoint = new Waypoint(elegibles.get(i).coor);
+        System.out.println(elegibles.get(i).coor.latitude+"START");
         Waypoint destinationWaypoint = new Waypoint(destinationGeoCoordinates);
-
+        System.out.println(destinationGeoCoordinates.latitude+"END");
         List<Waypoint> waypoints =
                 new ArrayList<>(Arrays.asList(startWaypoint, destinationWaypoint));
 
@@ -91,56 +91,33 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
                         if (routingError == null) {
-
-
-                            ArrayList<GeoPolyline> routeGeoPolylines = new ArrayList<GeoPolyline>();
-                            try {
-                                for(Route route: routes){
-                                    routeGeoPolylines.add(new GeoPolyline(route.getPolyline()));
-                                    showRouteDetails(route);
-                                    policia.distT = route.getDurationInSeconds();
-                                }
-
-                            } catch (InstantiationErrorException e) {
-                                // It should never happen that a route polyline contains less than two vertices.
-                                return;
-                            }
-
-                            float widthInPixels = 20;
-                            ArrayList<MapPolyline> routeMapPolylines = new ArrayList<MapPolyline>();
-
-                            for(GeoPolyline geo: routeGeoPolylines){
-                                MapPolyline routeMapPolyline = new MapPolyline(geo,
-                                        widthInPixels,
-                                        Color.valueOf(0f, 0.56f, 0.54f, 0.63f)); // RGBA
-//                                mapView.getMapScene().addMapPolyline(routeMapPolyline);
-                            }
-
+                                 elegibles.get(i).setDistT(routes.get(0).getDurationInSeconds());
+                                 elegibles.get(i).setRoute(routes.get(0));
+                                 showRouteOnMap(elegibles.get(i).Route);
 
                         } else {
                             new AlertDialog.Builder(MainActivity.this).setTitle("Error while calculating a route:").setMessage(routingError.toString()).show();
                         }
+
                     }
                 });
+
+
     }
 
 
 
-    private void matcher(){
+    private void matcher(double lat, double lng) {
         Collections.sort(policias);
-
-        List<Policia> elegibles = new ArrayList<Policia>();
+        System.out.println(policias.size()+"AASDDA");
         int i = 0;
-        for(Policia p : policias){
+        for (Policia p : policias) {
             elegibles.add(p);
             i++;
-            if(i == 10) break;
+            if (i == 10) break;
         }
-
-
-        for(Policia p : elegibles){
-
-
+        for (int j = 0; j < elegibles.size(); j++) {
+            routeMap (new GeoCoordinates(lat,lng), j);
         }
 
     }
@@ -152,12 +129,12 @@ public class MainActivity extends AppCompatActivity {
         double j = -73.375;
         while(i < 5.5865){
 
-            j += 0.01;
-            i += 0.01;
+            j += 0.001;
+            i += 0.001;
 
             GeoCoordinates coordenadas = new GeoCoordinates(i, j);
 //            MapImage mapImage = MapImageFactory.fromResource(getApplicationContext().getResources(), R.drawable.police);
-            MapImage mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), R.drawable.police, 50, 50));
+            MapImage mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), R.drawable.police, 50, 80));
 //            Anchor2D anchor2D = new Anchor2D(0.5F, .5F);
             MapMarker mapMarker = new MapMarker(coordenadas, mapImage);
             mapMarker.setImage(mapImage);
@@ -168,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
             p.dist = Math.sqrt( (lat2 - lat)*(lat2 - lat)  + (lng2 - lng)*(lng2 - lng) );
             policias.add(p);
         }
+
 
     }
     private void showRouteDetails(Route route) {
@@ -195,15 +173,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createRandomCoordinatesTunja(View v){
-
         double lat = 5.5016;
         double lng = -73.375;
-
-        loadMapScene(lat, lng);
         createPolicias(lat, lng);
+        matcher(lat,lng);
+        loadMapScene(lat, lng);
     }
     public void createRandomCoordinatesMotavita(View v){
-
         double lat = 5.578000;
         double lng = -73.368144;
 
@@ -224,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mapError == null) {
                     GeoCoordinates coordenadas = new GeoCoordinates(lat,lng);
                     MapImage mapImage = null;
-                    mapImage = MapImageFactory.fromResource(getApplicationContext().getResources(), R.drawable.policiacarro);
+                    mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), R.drawable.person, 100, 100));
                     Anchor2D anchor2D = new Anchor2D(0.5F, .5F);
                     MapMarker mapMarker = new MapMarker(coordenadas, mapImage, anchor2D);
                     double distanceInMeters = 1000 ; //Distancia de la cámara a la tierra
@@ -289,6 +265,25 @@ public class MainActivity extends AppCompatActivity {
         // si queremos poder mostrar nuestra imagen tenemos que crear un
         // objeto drawable y así asignarlo a un botón, imageview...
         return resizedBitmap;
+
+    }
+    float widthInPixels = 100;
+    private void showRouteOnMap(Route route) {
+        // Show route as polyline.
+        GeoPolyline routeGeoPolyline;
+        try {
+            routeGeoPolyline = new GeoPolyline(route.getPolyline());
+        } catch (InstantiationErrorException e) {
+            // It should never happen that a route polyline contains less than two vertices.
+            return;
+        }
+
+        widthInPixels = widthInPixels -10;
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline,
+                widthInPixels,
+                Color.valueOf(widthInPixels, 0.56f, 0.54f, 0.63f)); // RGBA
+
+        mapView.getMapScene().addMapPolyline(routeMapPolyline);
 
     }
 }
