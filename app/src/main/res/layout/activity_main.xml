@@ -28,11 +28,28 @@
         tools:layout_editor_absoluteY="0dp">
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/tunja"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="createRandomCoordinatesTunja"
-            android:text="Tunja" />
+            android:text="Tunja"
+            android:translationX="10px" />
+
+        <Button
+            android:id="@+id/somaca"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="createRandomCoordinatesSomaca"
+            android:text="Somacá"
+            android:translationX="310px" />
+
+        <Button
+            android:id="@+id/motavita"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="createRandomCoordinatesMotavita"
+            android:text="Motavita"
+            android:translationX="640px" />
 
     </com.here.sdk.mapview.MapView>
 

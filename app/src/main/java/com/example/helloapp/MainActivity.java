@@ -13,6 +13,8 @@ import com.here.sdk.core.GeoCoordinates;
 import com.here.sdk.core.GeoPolyline;
 import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.mapview.MapError;
+import com.here.sdk.mapview.MapImage;
+import com.here.sdk.mapview.MapImageFactory;
 import com.here.sdk.mapview.MapMarker;
 import com.here.sdk.mapview.MapPolyline;
 import com.here.sdk.mapview.MapScene;
@@ -48,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "HERE Rendering Engine attached.");
             }
         });
-        routeMap();
-        loadMapScene(4.6262298,-74.090634);
 //        MapMarker defaultMarker = new MapMarker();
 //        defaultMarker.setCoordinate(new GeoCoordinate(37.7397, -121.4252, 0.0));
 //        mapView.addMapObject(defaultMarker);
@@ -134,10 +134,24 @@ public class MainActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%02d horas, %02d minutos", hours, minutes);
     }
 
-    public void createRandomCoordinatesTunja(){
+    public void createRandomCoordinatesTunja(View v){
 
         double lat = 5.5016;
         double lng = -73.375;
+
+        loadMapScene(lat, lng);
+    }
+    public void createRandomCoordinatesMotavita(View v){
+
+        double lat = 5.578000;
+        double lng = -73.368144;
+
+        loadMapScene(lat, lng);
+    }
+    public void createRandomCoordinatesSomaca(View v){
+
+        double lat = 5.492345;
+        double lng = -73.486189;
 
         loadMapScene(lat, lng);
     }
@@ -147,10 +161,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 if (mapError == null) {
-                    double distanceInMeters = 1000 * 10; //Distancia de la cámara a la tierra
+                    GeoCoordinates coordenadas = new GeoCoordinates(lat,lng);
+                    MapImage mapImage = null;
+                    try {
+                        mapImage = new MapImage("~/HelloApp/app/src/img/marker.png",20,20);
+                    } catch (InstantiationErrorException e) {
+                        e.printStackTrace();
+                    }
+                    MapMarker mapMarker = new MapMarker(coordenadas, mapImage);
+                    double distanceInMeters = 1000 ; //Distancia de la cámara a la tierra
                     mapView.getCamera().lookAt(
-                            new GeoCoordinates(lat,lng), distanceInMeters);
-//
+                            coordenadas, distanceInMeters);
+                    mapView.getMapScene().addMapMarker(mapMarker);
                 } else {
                     Log.d(TAG, "Loading map failed: mapError: " + mapError.name());
                 }
