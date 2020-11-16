@@ -13,6 +13,7 @@ import com.here.sdk.core.GeoCoordinates;
 import com.here.sdk.core.GeoPolyline;
 import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.mapview.MapError;
+import com.here.sdk.mapview.MapMarker;
 import com.here.sdk.mapview.MapPolyline;
 import com.here.sdk.mapview.MapScene;
 import com.here.sdk.mapview.MapScheme;
@@ -48,9 +49,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         routeMap();
-        loadMapScene();
-
+        loadMapScene(4.6262298,-74.090634);
+//        MapMarker defaultMarker = new MapMarker();
+//        defaultMarker.setCoordinate(new GeoCoordinate(37.7397, -121.4252, 0.0));
+//        mapView.addMapObject(defaultMarker);
     }
+
+
+    //Tunja 2 triangulos
+    ////Inferior ( (5.5016, -73.375), (5.5379, -73.3696), (5.5385, -73.3397))
+    ////Inferior ( (5.5865, -73.331), (5.5379, -73.3696), (5.5385, -73.3397))
     private void routeMap() {
         try {
             routingEngine = new RoutingEngine();
@@ -126,8 +134,14 @@ public class MainActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%02d horas, %02d minutos", hours, minutes);
     }
 
+    public void createRandomCoordinatesTunja(){
 
-    private void loadMapScene() {
+        double lat = 5.5016;
+        double lng = -73.375;
+
+        loadMapScene(lat, lng);
+    }
+    private void loadMapScene(double lat, double lng) {
         // Load a scene from the HERE SDK to render the map with a map scheme.
         mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
@@ -135,7 +149,8 @@ public class MainActivity extends AppCompatActivity {
                 if (mapError == null) {
                     double distanceInMeters = 1000 * 10; //Distancia de la cámara a la tierra
                     mapView.getCamera().lookAt(
-                            new GeoCoordinates(4.6262298,-74.090634), distanceInMeters);
+                            new GeoCoordinates(lat,lng), distanceInMeters);
+//
                 } else {
                     Log.d(TAG, "Loading map failed: mapError: " + mapError.name());
                 }
