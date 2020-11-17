@@ -421,7 +421,8 @@ public class MainActivity extends AppCompatActivity {
 
         String info = "";
         for(int i = 0; i < elegibles.size(); ++i){
-            info += "\n" + "La ruta " + (i+1) + " consta de:\n" + showRouteDetails(elegibles.get(i).Route);
+
+            if(elegibles.get(i).Route != null) info += "\n" + "La ruta " + (i+1) + " consta de:\n" + showRouteDetails(elegibles.get(i).Route);
             if(i == 5) break;
         }
         infoRutas.setText(info);
