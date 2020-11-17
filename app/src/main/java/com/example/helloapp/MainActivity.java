@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -12,6 +13,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.Color;
@@ -38,18 +40,176 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private MapView mapView;
+    private TextView infoRutas;
     private static final String TAG = "MyActivity";
     private RoutingEngine routingEngine;
 
     private List<Policia> policias = new ArrayList<Policia>();;
     private List<Policia> elegibles = new ArrayList<Policia>();;
+    private MapMarker mapMarker;
 
+    private List<List<GeoCoordinates>> ubicacionServicios = new ArrayList<>();
     private int numRutasCalculadas = 0;
+
+
+    private void generateLocationsServices(){
+        ubicacionServicios.add(new ArrayList<>()); //TUNJA
+        ubicacionServicios.add(new ArrayList<>()); //SAMACA
+        ubicacionServicios.add(new ArrayList<>()); //MOTAVITA
+        ubicacionServicios.add(new ArrayList<>()); //SOTAQUIRA
+
+        //TUNJA
+        GeoCoordinates coor;
+        coor = new GeoCoordinates( 5.548561, -73.365390);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.552694, -73.348190);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.544833, -73.354330);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.558430, -73.352955);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.572863, -73.342985);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.574484, -73.334638);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.532453, -73.368012);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.525407, -73.359631);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.509021, -73.367932);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.526163, -73.359035);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.525300, -73.364041);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.519119, -73.352261);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.532671, -73.344053);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.545124, -73.371545);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.525267, -73.373406);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.549446, -73.353959);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.536870, -73.360883);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates( 5.529256, -73.346527);
+        ubicacionServicios.get(0).add(coor);
+        //ZONA RURAL TUNJA
+        coor = new GeoCoordinates(5.527026, -73.380459);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates(5.511030, -73.343574);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates(5.521546, -73.334337);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates(5.586959, -73.345015);
+        ubicacionServicios.get(0).add(coor);
+        coor = new GeoCoordinates(5.491047, -73.386332);
+        ubicacionServicios.get(0).add(coor);
+
+
+        //SAMACA
+        coor = new GeoCoordinates(5.492094, -73.487034);
+        ubicacionServicios.get(1).add(coor);
+        coor = new GeoCoordinates(5.493341, -73.465349);
+        ubicacionServicios.get(1).add(coor);
+
+        //MOTAVITA
+        coor = new GeoCoordinates(5.576905, -73.369377);
+        ubicacionServicios.get(2).add(coor);
+        coor = new GeoCoordinates(5.585306, -73.363003);
+        ubicacionServicios.get(2).add(coor);
+
+
+        //SOTAQUIRÁ
+        coor = new GeoCoordinates(5.764929, -73.246165);
+        ubicacionServicios.get(3).add(coor);
+        coor = new GeoCoordinates(5.759378, -73.236898);
+        ubicacionServicios.get(3).add(coor);
+
+    }
+
+    public void addMarker(int img, GeoCoordinates coordenadas){
+        MapImage mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), img, 50, 80));
+        MapMarker mapMarker = new MapMarker(coordenadas, mapImage);
+        mapMarker.setImage(mapImage);
+        mapView.getMapScene().addMapMarker(mapMarker);
+    }
+    public double calcEuclideanDist(GeoCoordinates pos1, GeoCoordinates pos2){
+        return Math.sqrt( (pos1.latitude - pos2.latitude)*(pos1.latitude - pos2.latitude)  + (pos1.longitude - pos2.longitude)*(pos1.longitude - pos2.longitude));
+    }
+    public void createPolicia(GeoCoordinates coordenadas){
+        Policia p = new Policia(coordenadas);
+        policias.add(p);
+        addMarker(R.drawable.police, coordenadas);
+    }
+    public void createPolicias(){
+
+        //TUNJA
+        GeoCoordinates coordenadas = new GeoCoordinates(5.509604, -73.373164);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.536094, -73.361819);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.540132, -73.354164);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.546875, -73.366125);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.515821, -73.371851);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.508934, -73.368204);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.514326, -73.356530);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.526024, -73.356364);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.556059, -73.350545);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.575580, -73.339574);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.509013, -73.368297);
+        createPolicia(coordenadas);
+
+
+//        double i = 5.5016;
+//        double j = -73.375;
+
+//        Policia p = new Policia(coordenadas);
+//        while(i < 5.5565){
+//
+//            j += 0.001;
+//            i += 0.002;
+//            coordenadas = new GeoCoordinates(i, j);
+//            createPolicia(coordenadas);
+//        }
+
+        //SAMACA
+        coordenadas = new GeoCoordinates(5.493094, -73.487034);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.491094, -73.487034);
+        createPolicia(coordenadas);
+
+
+        //SOTAQUIRA
+        coordenadas = new GeoCoordinates(5.764929, -73.246165);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.764929, -73.248165);
+        createPolicia(coordenadas);
+
+        //MOTAVITA
+        coordenadas = new GeoCoordinates(5.576905, -73.369377);
+        createPolicia(coordenadas);
+        coordenadas = new GeoCoordinates(5.576905, -73.367377);
+        createPolicia(coordenadas);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        infoRutas = (TextView) findViewById(R.id.infoRutas);
         // Get a MapView instance from the layout.
         mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
@@ -62,7 +222,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "HERE Rendering Engine attached.");
             }
         });
+        generateLocationsServices();
         createPolicias();
+
 //        defaultMarker.setCoordinate(new GeoCoordinate);
 //        mapView.getMapScene().addMapMarker(defaultMarker);
     }
@@ -123,65 +285,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-    public void addMarker(int img, GeoCoordinates coordenadas){
-        MapImage mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), img, 50, 80));
-        MapMarker mapMarker = new MapMarker(coordenadas, mapImage);
-        mapMarker.setImage(mapImage);
-        mapView.getMapScene().addMapMarker(mapMarker);
-    }
-    public double calcEuclideanDist(GeoCoordinates pos1, GeoCoordinates pos2){
-        return Math.sqrt( (pos1.latitude - pos2.latitude)*(pos1.latitude - pos2.latitude)  + (pos1.longitude - pos2.longitude)*(pos1.longitude - pos2.longitude));
-    }
-
-    public void createPolicia(GeoCoordinates coordenadas){
-        Policia p = new Policia(coordenadas);
-        policias.add(p);
-        addMarker(R.drawable.police, coordenadas);
-    }
-    public void createPolicias(){
-
-//        5.509604, -73.373164 CAI 1
-
-
-        //TUNJA
-        double i = 5.5016;
-        double j = -73.375;
-        GeoCoordinates coordenadas = new GeoCoordinates(i, j);
-        Policia p = new Policia(coordenadas);
-        while(i < 5.5565){
-
-            j += 0.001;
-            i += 0.002;
-            coordenadas = new GeoCoordinates(i, j);
-            createPolicia(coordenadas);
-        }
-
-        //SAMACA
-        coordenadas = new GeoCoordinates(5.493094, -73.487034);
-        createPolicia(coordenadas);
-        coordenadas = new GeoCoordinates(5.491094, -73.487034);
-        createPolicia(coordenadas);
-
-
-        //SOTAQUIRA
-        coordenadas = new GeoCoordinates(5.764929, -73.246165);
-        createPolicia(coordenadas);
-        coordenadas = new GeoCoordinates(5.764929, -73.248165);
-        createPolicia(coordenadas);
-
-        //MOTAVITA
-        coordenadas = new GeoCoordinates(5.576905, -73.369377);
-        createPolicia(coordenadas);
-        coordenadas = new GeoCoordinates(5.576905, -73.367377);
-        createPolicia(coordenadas);
-    }
-
     public void recalcPolicias(double lat, double lng){
         GeoCoordinates destino = new GeoCoordinates(lat, lng);
         numRutasCalculadas = 0;
         for(Policia p : policias){
             if(p.mapPolyline != null) mapView.getMapScene().removeMapPolyline(p.mapPolyline);
+            if(mapMarker != null) mapView.getMapScene().removeMapMarker(mapMarker);
             p.dist = calcEuclideanDist(destino, p.coor);
             p.distT = 0;
             p.mapPolyline = null;
@@ -189,14 +298,17 @@ public class MainActivity extends AppCompatActivity {
         }
         elegibles.clear();
     }
-    private void showRouteDetails(Route route) {
+
+
+    private String showRouteDetails(Route route) {
         long estimatedTravelTimeInSeconds = route.getDurationInSeconds();
         int lengthInMeters = route.getLengthInMeters();
 
         String routeDetails =
-                "Travel Time: " + formatTime(estimatedTravelTimeInSeconds)
-                        + ", Length: " + formatLength(lengthInMeters);
-        new AlertDialog.Builder(MainActivity.this).setTitle("Detalles de la ruta:").setMessage(routeDetails).show();
+                "Tiempo de demora: " + formatTime(estimatedTravelTimeInSeconds)
+                        + ", Distancia: " + formatLength(lengthInMeters);
+//        new AlertDialog.Builder(MainActivity.this).setTitle("Detalles de la ruta:").setMessage(routeDetails).show();
+        return routeDetails;
     }
 
 
@@ -214,21 +326,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createRandomCoordinatesTunja(View v){
-        double lat = 5.5316;
-        double lng = -73.365;
+        List<GeoCoordinates> posibleServices = ubicacionServicios.get(0);
+        java.util.Random random = new java.util.Random();
+        int randomLocationServiceIdx = random.nextInt(posibleServices.size());
+        GeoCoordinates coor = posibleServices.get(randomLocationServiceIdx);
+        double lat = coor.latitude;
+        double lng = coor.longitude;
+        loadMapScene(lat, lng);
+    }
+    public void createRandomCoordinatesSamaca(View v){
+
+        List<GeoCoordinates> posibleServices = ubicacionServicios.get(1);
+        java.util.Random random = new java.util.Random();
+        int randomLocationServiceIdx = random.nextInt(posibleServices.size());
+        GeoCoordinates coor = posibleServices.get(randomLocationServiceIdx);
+        double lat = coor.latitude;
+        double lng = coor.longitude;
         loadMapScene(lat, lng);
     }
     public void createRandomCoordinatesMotavita(View v){
-        double lat = 5.578000;
-        double lng = -73.368144;
+        List<GeoCoordinates> posibleServices = ubicacionServicios.get(2);
+        java.util.Random random = new java.util.Random();
+        int randomLocationServiceIdx = random.nextInt(posibleServices.size());
+        GeoCoordinates coor = posibleServices.get(randomLocationServiceIdx);
+        double lat = coor.latitude;
+        double lng = coor.longitude;
         loadMapScene(lat, lng);
     }
-    public void createRandomCoordinatesSomaca(View v){
+    public void createRandomCoordinatesSotaquira(View v){
+        List<GeoCoordinates> posibleServices = ubicacionServicios.get(3);
+        java.util.Random random = new java.util.Random();
+        int randomLocationServiceIdx = random.nextInt(posibleServices.size());
+        GeoCoordinates coor = posibleServices.get(randomLocationServiceIdx);
+        double lat = coor.latitude;
+        double lng = coor.longitude;
+        loadMapScene(lat, lng);
+    }
 
-        double lat = 5.492345;
-        double lng = -73.486189;
-        loadMapScene(lat, lng);
-    }
     private void loadMapScene(double lat, double lng) {
         // Load a scene from the HERE SDK to render the map with a map scheme.
         mapView = findViewById(R.id.map_view);
@@ -240,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
                     MapImage mapImage = null;
                     mapImage = MapImageFactory.fromBitmap(resizeImage(getApplicationContext(), R.drawable.person, 100, 100));
                     Anchor2D anchor2D = new Anchor2D(0.5F, .5F);
-                    MapMarker mapMarker = new MapMarker(coordenadas, mapImage, anchor2D);
+                    mapMarker = new MapMarker(coordenadas, mapImage, anchor2D);
                     double distanceInMeters = 1000 ; //Distancia de la cámara a la tierra
                     mapView.getCamera().lookAt(
                             coordenadas, distanceInMeters);
@@ -275,6 +409,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void showRutas(){
+        Collections.sort(elegibles);
+
+        for(int i = elegibles.size() - 1; i > 0 ; --i){
+
+            if(elegibles.get(i).Route != null) showRouteOnMap(elegibles.get(i).Route, i, elegibles.get(i));
+        }
+        if(elegibles.get(0).Route != null) showRouteOnMap(elegibles.get(0).Route, -1, elegibles.get(0));
+
+
+        String info = "";
+        for(int i = 0; i < elegibles.size(); ++i){
+            info += "\n" + "La ruta " + (i+1) + " consta de:\n" + showRouteDetails(elegibles.get(i).Route);
+            if(i == 5) break;
+        }
+        infoRutas.setText(info);
+    }
+
+
+    float widthInPixels = 10;
+    private void showRouteOnMap(Route route, int puesto, Policia p) {
+        // Show route as polyline.
+        GeoPolyline routeGeoPolyline;
+        try {
+            routeGeoPolyline = new GeoPolyline(route.getPolyline());
+        } catch (InstantiationErrorException e) {
+            // It should never happen that a route polyline contains less than two vertices.
+            return;
+        }
+        if(puesto == -1) widthInPixels = 20;
+        widthInPixels = widthInPixels;
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline,
+                widthInPixels,
+                Color.valueOf((puesto*20)/255f, (255-puesto*10)/255f, (puesto*20)/255f, puesto*10/255f)); // RGBA
+        p.mapPolyline = routeMapPolyline;
+        mapView.getMapScene().addMapPolyline(routeMapPolyline);
+//        mapView.getMapScene().
+
+    }
+
     public static Bitmap resizeImage(Context ctx, int resId, int w, int h) {
 
         // cargamos la imagen de origen
@@ -308,35 +482,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showRutas(){
-        Collections.sort(elegibles);
 
-        for(int i = elegibles.size() - 1; i > 0 ; --i){
-
-            if(elegibles.get(i).Route != null) showRouteOnMap(elegibles.get(i).Route, i, elegibles.get(i));
-        }
-        if(elegibles.get(0).Route != null) showRouteOnMap(elegibles.get(0).Route, -1, elegibles.get(0));
-    }
-
-
-    float widthInPixels = 10;
-    private void showRouteOnMap(Route route, int puesto, Policia p) {
-        // Show route as polyline.
-        GeoPolyline routeGeoPolyline;
-        try {
-            routeGeoPolyline = new GeoPolyline(route.getPolyline());
-        } catch (InstantiationErrorException e) {
-            // It should never happen that a route polyline contains less than two vertices.
-            return;
-        }
-        if(puesto == -1) widthInPixels = 20;
-        widthInPixels = widthInPixels;
-        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline,
-                widthInPixels,
-                Color.valueOf((puesto*20)/255f, (255-puesto*10)/255f, (puesto*20)/255f, puesto*10/255f)); // RGBA
-        p.mapPolyline = routeMapPolyline;
-        mapView.getMapScene().addMapPolyline(routeMapPolyline);
-//        mapView.getMapScene().
-
-    }
 }

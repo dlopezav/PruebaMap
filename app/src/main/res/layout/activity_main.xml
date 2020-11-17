@@ -31,25 +31,51 @@
             android:id="@+id/tunja"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#C6DC7E"
             android:onClick="createRandomCoordinatesTunja"
             android:text="Tunja"
-            android:translationX="10px" />
+            android:translationX="0px"
+            android:translationY="1800px"
+            app:strokeColor="#7E9A3B" />
 
         <Button
             android:id="@+id/somaca"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="createRandomCoordinatesSomaca"
-            android:text="Somacá"
-            android:translationX="310px" />
+            android:backgroundTint="#DAAD7C"
+            android:checkable="true"
+            android:onClick="createRandomCoordinatesSamaca"
+            android:text="Samacá"
+            android:translationX="235px"
+            android:translationY="1800px"
+            app:strokeColor="#201C1C" />
 
         <Button
             android:id="@+id/motavita"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#75AAD8"
             android:onClick="createRandomCoordinatesMotavita"
             android:text="Motavita"
-            android:translationX="640px" />
+            android:translationX="495px"
+            android:translationY="1800px"
+            app:iconTint="#FFFFFF" />
+
+        <Button
+            android:id="@+id/sotaquira"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#CF7077"
+            android:onClick="createRandomCoordinatesSotaquira"
+            android:text="Sotaquira"
+            android:translationX="785px"
+            android:translationY="1800px" />
+
+        <TextView
+            android:id="@+id/infoRutas"
+            android:layout_width="187dp"
+            android:layout_height="363dp"
+            android:textColor="#000000" />
 
     </com.here.sdk.mapview.MapView>
 
